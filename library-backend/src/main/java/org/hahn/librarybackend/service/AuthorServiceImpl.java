@@ -1,10 +1,11 @@
 package org.hahn.librarybackend.service;
 
 import org.hahn.librarybackend.dao.AuthorRepository;
+import org.hahn.librarybackend.dao.BookRepository;
 import org.hahn.librarybackend.dto.AuthorDTO;
 import org.hahn.librarybackend.entity.Author;
+import org.hahn.librarybackend.exceptions.ResourceNotFoundException;
 import org.hahn.librarybackend.mapper.AuthorMapper;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -17,8 +18,14 @@ import java.util.stream.Collectors;
 @Transactional
 public class AuthorServiceImpl implements AuthorService {
 
-    @Autowired
     private AuthorRepository authorRepository;
+
+    private BookRepository bookRepository;
+
+    public AuthorServiceImpl(AuthorRepository authorRepository, BookRepository bookRepository) {
+        this.authorRepository = authorRepository;
+        this.bookRepository = bookRepository;
+    }
 
     @Override
     public List<AuthorDTO> getAllAuthors() {
@@ -36,7 +43,7 @@ public class AuthorServiceImpl implements AuthorService {
     @Override
     public AuthorDTO getAuthorById(Long id) {
         Author author = authorRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Author not found with id: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Author not found with id: " + id));
         return AuthorMapper.convertToDTO(author);
     }
 
@@ -50,7 +57,7 @@ public class AuthorServiceImpl implements AuthorService {
     @Override
     public AuthorDTO updateAuthor(Long id, AuthorDTO authorDTO) {
         Author author = authorRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Author not found with id: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Author not found with id: " + id));
 
         author.setFirstName(authorDTO.getFirstName());
         author.setLastName(authorDTO.getLastName());
@@ -64,7 +71,12 @@ public class AuthorServiceImpl implements AuthorService {
     @Override
     public void deleteAuthor(Long id) {
         Author author = authorRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Author not found with id: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Author not found with id: " + id));
+
+        int bookCount = bookRepository.countByAuthorId(id);
+        if (bookCount > 0) {
+            throw new IllegalStateException("Cannot delete author with existing books. Please delete all books first.");
+        }
         authorRepository.delete(author);
     }
 
