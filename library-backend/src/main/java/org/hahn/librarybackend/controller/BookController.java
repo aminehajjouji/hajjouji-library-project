@@ -1,9 +1,9 @@
 package org.hahn.librarybackend.controller;
 
 import jakarta.validation.Valid;
+import lombok.AllArgsConstructor;
 import org.hahn.librarybackend.dto.BookDTO;
 import org.hahn.librarybackend.service.BookService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -16,10 +16,10 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/books")
+@AllArgsConstructor
 @CrossOrigin(origins = "*", maxAge = 3600)
 public class BookController {
 
-    @Autowired
     private BookService bookService;
 
     @GetMapping
