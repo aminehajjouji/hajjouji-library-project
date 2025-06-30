@@ -16,6 +16,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/authors")
+@CrossOrigin(origins = "*", maxAge = 3600)
 public class AuthorController {
 
     private AuthorService authorService;
