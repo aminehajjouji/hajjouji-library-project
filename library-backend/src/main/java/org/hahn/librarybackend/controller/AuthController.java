@@ -3,9 +3,11 @@ package org.hahn.librarybackend.controller;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.hahn.librarybackend.dao.UserRepository;
+import org.hahn.librarybackend.dto.JwtResponse;
 import org.hahn.librarybackend.dto.LoginRequest;
 import org.hahn.librarybackend.dto.MessageResponse;
 import org.hahn.librarybackend.dto.SignupRequest;
+import org.hahn.librarybackend.entity.JwtUtils;
 import org.hahn.librarybackend.entity.User;
 import org.hahn.librarybackend.security.AppUserDetails;
 import org.springframework.http.ResponseEntity;
@@ -16,15 +18,11 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
-import java.util.Map;
-
 @AllArgsConstructor
 @RestController
 @RequestMapping("/api/auth")
 @CrossOrigin(origins = "*", maxAge = 3600)
 public class AuthController {
-
 
     private AuthenticationManager authenticationManager;
 
@@ -33,28 +31,30 @@ public class AuthController {
     private PasswordEncoder encoder;
 
 
+    private JwtUtils jwtUtils;
     @PostMapping("/signin")
-    public ResponseEntity<Map<String, Object>> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
+    public ResponseEntity<JwtResponse> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
 
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
+        String jwt = jwtUtils.generateJwtToken(authentication);
 
         AppUserDetails userDetails = (AppUserDetails) authentication.getPrincipal();
         User user = userDetails.getUser();
 
-        Map<String, Object> response = new HashMap<>();
 
-        response.put("id", user.getId());
-        response.put("username", user.getUsername());
-        response.put("email", user.getEmail());
-        response.put("firstName", user.getFirstName());
-        response.put("lastName", user.getLastName());
-        response.put("role", user.getRole().name());
-        response.put("type", "Bearer");
-
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(JwtResponse.builder()
+                .token(jwt)
+                .id(user.getId())
+                .username(user.getUsername())
+                .email(user.getEmail())
+                .firstName(user.getFirstName())
+                .lastName(user.getLastName())
+                .role(user.getRole().name())
+                .type("Bearer")
+                .build());
     }
 
     @PostMapping("/signup")
