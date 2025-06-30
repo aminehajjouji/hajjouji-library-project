@@ -1,4 +1,4 @@
-# Library Backend
+# Hajjouji Library project – Backend
 
 Ce projet est une API backend Java pour la gestion d'une bibliothèque, utilisant Spring Boot et JWT pour la sécurité.
 
