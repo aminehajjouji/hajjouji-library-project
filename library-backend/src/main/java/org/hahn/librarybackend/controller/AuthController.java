@@ -4,7 +4,7 @@ import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.hahn.librarybackend.dao.UserRepository;
 import org.hahn.librarybackend.dto.*;
-import org.hahn.librarybackend.entity.JwtUtils;
+import org.hahn.librarybackend.security.JwtUtils;
 import org.hahn.librarybackend.entity.RefreshToken;
 import org.hahn.librarybackend.entity.User;
 import org.hahn.librarybackend.exceptions.RefreshTokenException;
